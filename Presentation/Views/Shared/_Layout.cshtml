@@ -27,7 +27,17 @@
                     </ul>
                 </div>
                 <div class="justify-content-end">
-                   <a href="/Home/Login">Log in</a>
+                    @if (User.Identity.IsAuthenticated)
+                    {
+                        <span>@User.Identity.Name</span>
+                        <span>-</span> <span>@User.Claims.ElementAt(4).Value</span>
+                        <a href="/Home/Logout">Log out</a>
+                    }
+                    else
+                    {
+                        <a href="/Home/Login">Log in</a>
+                    }
+
                 </div>
             </div>
         </nav>
