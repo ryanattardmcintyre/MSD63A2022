@@ -37,20 +37,28 @@ namespace Presentation.Controllers
 
             if (snapshot.Exists)
             {
-                Console.WriteLine("Document data for {0} document:", snapshot.Id);
-                Dictionary<string, object> userFromDb = snapshot.ToDictionary();
+                //  Console.WriteLine("Document data for {0} document:", snapshot.Id);
+                //Dictionary<string, object> userFromDb = snapshot.ToDictionary();
+                //myUser.FirstName = userFromDb["firstName"].ToString();
+                //myUser.LastName = userFromDb["lastName"].ToString();
 
-                myUser.FirstName = userFromDb["firstName"].ToString();
-                myUser.LastName = userFromDb["lastName"].ToString();
+                myUser = snapshot.ConvertTo<UserModel>();
             }
             
             return View(myUser);
         }
 
         //adds user details
-        public IActionResult Register() //post
+        [Authorize]
+        public async Task<IActionResult> Register(UserModel user) //post
         {
-            return View();
+            FirestoreDb db = FirestoreDb.Create(project);
+            DocumentReference docRef = db.Collection("users").Document(User.Claims.ElementAt(4).Value);
+
+            user.Email = User.Claims.ElementAt(4).Value;
+            await docRef.SetAsync(user);
+
+            return RedirectToAction("Index");
         }
 
         //send a message to someone else

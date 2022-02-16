@@ -17,6 +17,8 @@ namespace Presentation
     {
         public Startup(IConfiguration configuration)
         {
+            System.Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", @"C:\Users\attar\Downloads\msd63a2022-e7c2e38466d6.json");
+
             Configuration = configuration;
         }
 
