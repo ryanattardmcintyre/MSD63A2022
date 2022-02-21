@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
+using Presentation.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -62,15 +63,42 @@ namespace Presentation.Controllers
         }
 
         //send a message to someone else
+        [HttpGet][Authorize]
         public IActionResult Send()
         {
             return View();
         }
 
-        //List all messages sent from history
-        public IActionResult List()
+        [HttpPost]
+        [Authorize]
+        public async Task<IActionResult> Send(Message msg)
         {
-            return View();
+            msg.Id = Guid.NewGuid().ToString(); //unique id
+            
+            FirestoreDb db = FirestoreDb.Create(project);
+            DocumentReference docRef = db.Collection("users").Document(User.Claims.ElementAt(4).Value).Collection("messages").Document(msg.Id);
+            await docRef.SetAsync(msg);
+
+            return RedirectToAction("List");
+
+        }
+
+        //List all messages sent from history
+        [Authorize]
+        public async Task<IActionResult> List()
+        {
+            FirestoreDb db = FirestoreDb.Create(project);
+
+            Query allMessagesQuery = db.Collection("users").Document(User.Claims.ElementAt(4).Value).Collection("messages").OrderByDescending("DateSent");
+            QuerySnapshot allMessagesQuerySnapshot = await allMessagesQuery.GetSnapshotAsync();
+            List<Message> messages = new List<Message>();
+
+            foreach (DocumentSnapshot documentSnapshot in allMessagesQuerySnapshot.Documents)
+            {
+                messages.Add(documentSnapshot.ConvertTo<Message>());
+            }
+
+            return View(messages);
         }
     }
 }
