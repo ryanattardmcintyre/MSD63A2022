@@ -10,9 +10,9 @@
 <hr />
 <div class="row">
     <div class="col-md-4">
-        <form asp-action="Send">
+        <form asp-action="Send" enctype="multipart/form-data">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            
+
             <div class="form-group">
                 <label asp-for="Text" class="control-label"></label>
                 <input asp-for="Text" class="form-control" />
@@ -22,6 +22,10 @@
                 <label asp-for="Recipient" class="control-label"></label>
                 <input asp-for="Recipient" class="form-control" />
                 <span asp-validation-for="Recipient" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                Attachment:
+                <input type="file" name="attachment" class="form-control" />
             </div>
             <div class="form-group">
                 <input type="submit" value="Create" class="btn btn-primary" />

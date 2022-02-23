@@ -1,5 +1,7 @@
 ﻿using Google.Cloud.Firestore;
+using Google.Cloud.Storage.V1;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Presentation.Models;
@@ -8,14 +10,17 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using UserModel = Presentation.Models.User;
+using System.IO;
 
 namespace Presentation.Controllers
 {
     public class UsersController : Controller
     {
         string project = "";
+        string bucketName = "";
         public UsersController(IConfiguration configuration)
         {
+            bucketName = configuration["bucket"];
             project = configuration["project"];
         }
 
@@ -71,10 +76,27 @@ namespace Presentation.Controllers
 
         [HttpPost]
         [Authorize]
-        public async Task<IActionResult> Send(Message msg)
+        public async Task<IActionResult> Send(Message msg, IFormFile attachment )
         {
             msg.Id = Guid.NewGuid().ToString(); //unique id
-            
+
+            if (attachment != null)
+            {
+                //1. will upload attachment to cloud storage 
+                
+                var storage = StorageClient.Create();
+                using (Stream myUploadingFile = attachment.OpenReadStream()  )
+                {
+                    storage.UploadObject(bucketName, msg.Id + System.IO.Path.GetExtension(attachment.FileName)  , null, myUploadingFile);
+                }
+
+                //2. will set the value of msg.AttachmentUri
+                //https://storage.googleapis.com/msd63a2022ra/Letter%20Q.docx
+
+                msg.AttachmentUri = $"https://storage.googleapis.com/{bucketName}/{msg.Id + System.IO.Path.GetExtension(attachment.FileName)}";
+
+            }
+
             FirestoreDb db = FirestoreDb.Create(project);
             DocumentReference docRef = db.Collection("users").Document(User.Claims.ElementAt(4).Value).Collection("messages").Document(msg.Id);
             await docRef.SetAsync(msg);

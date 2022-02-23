@@ -18,5 +18,11 @@ namespace Presentation.Models
         
         [FirestoreProperty, ServerTimestamp]
         public Timestamp DateSent { get; set; }
+
+        [FirestoreProperty]
+        public string AttachmentUri { get; set; }
+
+
+
     }
 }
