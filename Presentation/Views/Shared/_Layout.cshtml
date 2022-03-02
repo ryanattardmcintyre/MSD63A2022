@@ -54,6 +54,22 @@
     </header>
     <div class="container">
         <main role="main" class="pb-3">
+            <div>
+                @if (ViewBag.Message != null)
+                {
+                    <div class="alert alert-primary" role="alert">
+                        <span>@ViewBag.Message</span>
+                    </div>
+                }
+
+                @if (ViewBag.Error != null)
+                {
+                    <div class="alert alert-danger" role="alert">
+                        <span>@ViewBag.Error</span>
+                    </div>
+                }
+            </div>
+            
             @RenderBody()
         </main>
     </div>
