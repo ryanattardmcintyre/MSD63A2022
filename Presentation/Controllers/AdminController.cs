@@ -6,11 +6,20 @@ using System.Linq;
 using System.Threading.Tasks;
 using StackExchange.Redis;
 using Newtonsoft.Json;
+using Microsoft.Extensions.Configuration;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Presentation.Controllers
 {
+    [Authorize]
     public class AdminController : Controller
     {
+        string connectionString = "";
+        public AdminController(IConfiguration configuration) //using dependecy injection aka constructor injection
+        {
+            connectionString = configuration["redis"];
+        }
+
         public IActionResult Create() //will load the page where the user can insert a new menu
         {
             return View();
@@ -22,7 +31,7 @@ namespace Presentation.Controllers
 
             try
             {
-                ConnectionMultiplexer cm = ConnectionMultiplexer.Connect("");
+                ConnectionMultiplexer cm = ConnectionMultiplexer.Connect(connectionString);
                 var db = cm.GetDatabase();
 
                 //1. get all the existent menuitems

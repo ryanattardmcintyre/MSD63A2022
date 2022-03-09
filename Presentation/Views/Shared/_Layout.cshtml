@@ -1,4 +1,5 @@
-﻿<!DOCTYPE html>
+﻿@inject Microsoft.Extensions.Configuration.IConfiguration config;
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -18,22 +19,31 @@
                 </button>
                 <div class="navbar-collapse collapse d-sm-inline-flex flex-sm-row-reverse">
                     <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
+                        @{
+                            var connectionString = config["redis"];
 
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Users" asp-action="Send">Send message</a>
-                            @*<a class="nav-link text-dark" href="/Users/Send"> Send Message  </a>*@
-                        </li>
+                            StackExchange.Redis.ConnectionMultiplexer cm = StackExchange.Redis.ConnectionMultiplexer.Connect(connectionString);
+                            var db = cm.GetDatabase();
 
+                            var myMenuItems = db.StringGet("menuitems");
 
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Users" asp-action="List">List Messages</a>
-                        </li>
+                            List<MenuItem> myList = new List<MenuItem>();
+                            if (myMenuItems.IsNullOrEmpty)
+                            {
+                                myList = new List<MenuItem>();
+                            }
+                            else
+                            {
+                                myList = Newtonsoft.Json.JsonConvert.DeserializeObject<List<MenuItem>>(myMenuItems);
+                            }
+                        }
+
+                        @foreach (var menu in myList)
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" href="@menu.Link">@menu.Text</a>
+                            </li>
+                        }
                     </ul>
                 </div>
                 <div class="justify-content-end">
@@ -69,7 +79,7 @@
                     </div>
                 }
             </div>
-            
+
             @RenderBody()
         </main>
     </div>
