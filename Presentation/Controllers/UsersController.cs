@@ -11,6 +11,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using UserModel = Presentation.Models.User;
 using System.IO;
+using Google.Cloud.PubSub.V1;
+using Newtonsoft.Json;
+using Google.Protobuf;
 
 namespace Presentation.Controllers
 {
@@ -100,6 +103,24 @@ namespace Presentation.Controllers
             FirestoreDb db = FirestoreDb.Create(project);
             DocumentReference docRef = db.Collection("users").Document(User.Claims.ElementAt(4).Value).Collection("messages").Document(msg.Id);
             await docRef.SetAsync(msg);
+
+
+            //publish message to queue (pub/sub)
+
+            TopicName topic = new TopicName(project, "msd63atopic");
+
+            PublisherClient client = PublisherClient.Create(topic);
+
+
+            string mail_serialized = JsonConvert.SerializeObject(msg); //Message >>> string
+
+            PubsubMessage message = new PubsubMessage
+            {
+                Data = ByteString.CopyFromUtf8(mail_serialized) //encapsulating the string into a ByteString
+
+            };
+
+            await client.PublishAsync(message);
 
             return RedirectToAction("List");
 
