@@ -7,8 +7,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Google.Cloud.Diagnostics.AspNetCore3" Version="4.4.0" />
+    <PackageReference Include="Google.Cloud.Diagnostics.Common" Version="4.4.0" />
     <PackageReference Include="Google.Cloud.Firestore" Version="2.5.0" />
     <PackageReference Include="Google.Cloud.PubSub.V1" Version="2.7.0" />
+    <PackageReference Include="Google.Cloud.SecretManager.V1" Version="1.8.0" />
     <PackageReference Include="Google.Cloud.Storage.V1" Version="3.7.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="3.1.22" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="3.1.21" />

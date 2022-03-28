@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Authentication;
+﻿
+using Google.Cloud.Diagnostics.AspNetCore3;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -14,14 +16,27 @@ namespace Presentation.Controllers
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
+        private readonly IExceptionLogger _exceptionLogger;
 
-        public HomeController(ILogger<HomeController> logger)
+        public HomeController(ILogger<HomeController> logger,
+          IExceptionLogger exceptionLogger)
         {
             _logger = logger;
+            _exceptionLogger = exceptionLogger;
         }
 
         public IActionResult Index()
         {
+            _logger.LogInformation("Accessed the Index method");
+            _logger.LogWarning("An error will be thrown on purpose to test");
+            try
+            {
+                throw new Exception("testing error reporting");
+            }
+            catch(Exception ex)
+            {
+                _exceptionLogger.Log(ex);
+            }
             return View();
         }
 

@@ -82,22 +82,27 @@ namespace Presentation.Controllers
         public async Task<IActionResult> Send(Message msg, IFormFile attachment )
         {
             msg.Id = Guid.NewGuid().ToString(); //unique id
-
-            if (attachment != null)
+            try
             {
-                //1. will upload attachment to cloud storage 
-                
-                var storage = StorageClient.Create();
-                using (Stream myUploadingFile = attachment.OpenReadStream()  )
+                if (attachment != null)
                 {
-                    storage.UploadObject(bucketName, msg.Id + System.IO.Path.GetExtension(attachment.FileName)  , null, myUploadingFile);
+                    //1. will upload attachment to cloud storage 
+
+                    var storage = StorageClient.Create();
+                    using (Stream myUploadingFile = attachment.OpenReadStream())
+                    {
+                        storage.UploadObject(bucketName, msg.Id + System.IO.Path.GetExtension(attachment.FileName), null, myUploadingFile);
+                    }
+
+                    //2. will set the value of msg.AttachmentUri
+                    //https://storage.googleapis.com/msd63a2022ra/Letter%20Q.docx
+
+                    msg.AttachmentUri = $"https://storage.googleapis.com/{bucketName}/{msg.Id + System.IO.Path.GetExtension(attachment.FileName)}";
+
                 }
-
-                //2. will set the value of msg.AttachmentUri
-                //https://storage.googleapis.com/msd63a2022ra/Letter%20Q.docx
-
-                msg.AttachmentUri = $"https://storage.googleapis.com/{bucketName}/{msg.Id + System.IO.Path.GetExtension(attachment.FileName)}";
-
+            }catch (Exception ex)
+            {
+                //logger.....
             }
 
             FirestoreDb db = FirestoreDb.Create(project);
